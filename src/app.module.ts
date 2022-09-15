@@ -1,23 +1,34 @@
+import { MapeamentoService } from './service/mapeamento.service';
+import { MapeamentoController } from './controller/mapeamento.controller';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PersonaController } from './controller/student/persona.controller';
-import { StudentController } from './controller/student/student.controller';
+import { PersonaController } from './controller/persona.controller';
 import { PersonaSchema } from './schema/persona.schema';
-import { StudentSchema } from './schema/student.schema';
 import { PersonaService } from './service/persona.service';
-import { StudentService } from './service/student.service';
+import { MapeamentoSchema } from './schema/mapeamento.schema';
+import { PersonaTemplateSchema } from './schema/personaTemplate.schema';
+import { PersonaTemplateController } from './controller/personaTemplate.controller';
+import { PersonaTemplateService } from './service/personaTemplate.service';
 @Module({
-  imports:[
-      MongooseModule.forRoot('mongodb+srv://geradormassa:KcuGq9X6aq9bGLy0@cluster0.j36ngzf.mongodb.net/?retryWrites=true&w=majority'),
+  imports: [
+    MongooseModule.forRoot(
+      'mongodb+srv://geradormassa:KcuGq9X6aq9bGLy0@cluster0.j36ngzf.mongodb.net/?retryWrites=true&w=majority',
+    ),
 
-      MongooseModule.forFeature(
-        [
-            { name: 'Student', schema: StudentSchema }
-          , { name: 'Persona', schema: PersonaSchema }])
-        ],
-  controllers: [AppController,StudentController, PersonaController],
-  providers: [AppService,StudentService, PersonaService],
+    MongooseModule.forFeature([
+      { name: 'Persona', schema: PersonaSchema },
+      { name: 'Mapeamento', schema: MapeamentoSchema },
+      { name: 'PersonaTemplate', schema: PersonaTemplateSchema },
+    ]),
+  ],
+  controllers: [
+    MapeamentoController,
+    AppController,
+    PersonaController,
+    PersonaTemplateController,
+  ],
+  providers: [MapeamentoService, AppService,  PersonaService, PersonaTemplateService],
 })
 export class AppModule {}
