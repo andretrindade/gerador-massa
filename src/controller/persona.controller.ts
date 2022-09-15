@@ -21,12 +21,12 @@ export class PersonaController {
     @Body() createPersonaDto: CreatePersonaDto,
   ) {
     try {
-      const newPersona = await this.personaService.createPersona(
+      const data = await this.personaService.createPersona(
         createPersonaDto,
       );
       return response.status(HttpStatus.CREATED).json({
         message: 'Persona has been created successfully',
-        newPersona,
+        data,
       });
     } catch (err) {
       return response.status(HttpStatus.BAD_REQUEST).json({
@@ -44,13 +44,13 @@ export class PersonaController {
     @Body() updatePersonaDto: UpdatePersonaDto,
   ) {
     try {
-      const existingPersona = await this.personaService.updatePersona(
+      const data = await this.personaService.updatePersona(
         personaId,
         updatePersonaDto,
       );
       return response.status(HttpStatus.OK).json({
         message: 'Persona has been successfully updated',
-        existingPersona,
+        data,
       });
     } catch (err) {
       return response.status(err.status).json(err.response);
@@ -60,26 +60,29 @@ export class PersonaController {
   @Get()
   async getPersonas(@Res() response) {
     try {
-      const personaData = await this.personaService.getAllPersonas();
+      const data = await this.personaService.getAllPersonas();
       return response.status(HttpStatus.OK).json({
         message: 'All personas data found successfully',
-        personaData,
+        data,
       });
     } catch (err) {
       return response.status(err.status).json(err.response);
     }
   }
 
+
   @Get('/:id')
   async getPersona(@Res() response, @Param('id') personaId: string) {
     try {
-      const existingPersona = await this.personaService.getPersona(personaId);
+      const data = await this.personaService.getPersona(personaId);
       return response.status(HttpStatus.OK).json({
         message: 'Persona found successfully',
-        existingPersona,
+        data,
       });
     } catch (err) {
       return response.status(err.status).json(err.response);
     }
   }
+
+ 
 }
