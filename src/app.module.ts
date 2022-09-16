@@ -14,6 +14,9 @@ import { PersonaTemplateService } from './service/personaTemplate.service';
 import { CenarioController } from './controller/cenario.controller';
 import { CenarioService } from './service/cenario.service';
 import { CenarioSchema } from './schema/cenario.schema';
+import { TemplateController } from './controller/template.controller';
+import { TemplateService } from './service/template.service';
+import { TemplateSchema } from './schema/template.schema';
 @Module({
   imports: [
     MongooseModule.forRoot(
@@ -25,6 +28,7 @@ import { CenarioSchema } from './schema/cenario.schema';
       { name: 'Mapeamento', schema: MapeamentoSchema },
       { name: 'PersonaTemplate', schema: PersonaTemplateSchema },
       { name: 'Cenario', schema: CenarioSchema },
+      { name: 'Template', schema: TemplateSchema }
     ]),
   ],
   controllers: [
@@ -33,7 +37,8 @@ import { CenarioSchema } from './schema/cenario.schema';
     PersonaController,
     PersonaTemplateController,
     CenarioController,
+    TemplateController
   ],
-  providers: [MapeamentoService, AppService,  PersonaService, PersonaTemplateService, CenarioService],
+  providers: [MapeamentoService, AppService, PersonaService, PersonaTemplateService, CenarioService, TemplateService],
 })
-export class AppModule {}
+export class AppModule { }
