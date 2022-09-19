@@ -6,6 +6,6 @@ export class CreateMapeamentoDto {
 
      readonly template : any;
 
-     readonly mapeamentoItens : MapeamentoItem[]
+     readonly mapeamentoItemStringfy : string
 
 }

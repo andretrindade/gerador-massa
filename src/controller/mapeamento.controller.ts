@@ -29,6 +29,7 @@ import { MapeamentoService } from 'src/service/mapeamento.service';
           data,
         });
       } catch (err) {
+        console.log(err)
         return response.status(HttpStatus.BAD_REQUEST).json({
           statusCode: 400,
           message: 'Error: Mapeamento not created!',
@@ -40,12 +41,12 @@ import { MapeamentoService } from 'src/service/mapeamento.service';
     @Put('/:id')
     async updateMapeamento(
       @Res() response,
-      @Param('id') personaId: string,
+      @Param('id') mapeamentoId: string,
       @Body() updateMapeamentoDto: UpdateMapeamentoDto,
     ) {
       try {
         const data = await this.mapeamentoService.updateMapeamento(
-          personaId,
+          mapeamentoId,
           updateMapeamentoDto,
         );
         return response.status(HttpStatus.OK).json({
@@ -62,7 +63,7 @@ import { MapeamentoService } from 'src/service/mapeamento.service';
       try {
         const data = await this.mapeamentoService.getAllMapeamentos();
         return response.status(HttpStatus.OK).json({
-          message: 'All personas data found successfully',
+          message: 'All mapeamentos data found successfully',
           data,
         });
       } catch (err) {
@@ -71,9 +72,9 @@ import { MapeamentoService } from 'src/service/mapeamento.service';
     }
   
     @Get('/:id')
-    async getMapeamento(@Res() response, @Param('id') personaId: string) {
+    async getMapeamento(@Res() response, @Param('id') mapeamentoId: string) {
       try {
-        const data = await this.mapeamentoService.getMapeamento(personaId);
+        const data = await this.mapeamentoService.getMapeamento(mapeamentoId);
         return response.status(HttpStatus.OK).json({
           message: 'Mapeamento found successfully',
           data,
