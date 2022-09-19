@@ -5,5 +5,5 @@ export interface IMapeamento extends Document{
     
     readonly template : any;
  
-    readonly mapeamentoItens : MapeamentoItem[]
+    readonly mapeamentoItemStringfy : string
 }

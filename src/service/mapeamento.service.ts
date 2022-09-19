@@ -1,57 +1,68 @@
+
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { stringify } from 'querystring';
 import { CreateMapeamentoDto } from 'src/dto/create-mapeamento.dto';
 import { UpdateMapeamentoDto } from 'src/dto/update-mapeamento.dto';
 import { IMapeamento } from 'src/interface/mapeamento.interface';
-import MapeamentoItem from 'src/schema/mapeamentoItem.schema';
-import ConvertObjectToString from 'src/utils/convertObjectToString';
+import MapeamentoItem from '../schema/mapeamentoItem.schema';
+import {TipoMapeamentoItemEnum} from '../enuns/TipoMapeamentoItemEnum'
 @Injectable()
 export class MapeamentoService {
   constructor(
     @InjectModel('Mapeamento') private mapeamentoModel: Model<IMapeamento>,
   ) {}
 
+
   template: any = {
     id: 1,
-    descricao: '[2.0.0] [post] [request] payment/consent/',
+    descricao: '[2.0.0] [post] [response] [201] consent/consent/',
     dataExemplo: {
-      data: {
-        endToEndId: 'E9040088820210128000800123873170',
-        localInstrument: 'DICT',
-        payment: {
-          amount: '100000.12',
-          currency: 'BRL',
+     
+      "data": {
+        "consentId": "urn:bb:BB96825411",
+        "creationDateTime": "2022-08-01T09:35:00Z",
+        "status": "AUTHORISED",
+        "statusUpdateDateTime": "2022-08-01T09:35:00Z",
+        "permissions": [
+            "ACCOUNTS_READ",
+            "ACCOUNTS_BALANCES_READ",
+            "ACCOUNTS_TRANSACTIONS_READ",
+            "ACCOUNTS_OVERDRAFT_LIMITS_READ",
+            "CREDIT_CARDS_ACCOUNTS_READ",
+            "CREDIT_CARDS_ACCOUNTS_BILLS_READ",
+            "CREDIT_CARDS_ACCOUNTS_LIMITS_READ",
+            "RESOURCES_READ"
+        ],
+        "expirationDateTime": "2023-08-01T10:35:00Z",
+        "links": {
+            "self": "https://opendata.api.bb.com.br/open-banking/consents/v1/consents/urn:bb:BB96925654"
         },
-        remittanceInformation: 'Pagamento da nota XPTO035-002.',
-      },
+        "meta": {
+            "totalRecords": 1,
+            "totalPages": 1,
+            "requestDateTime": "2022-08-03T10:42:00Z"
+        },
+        "payment": [{
+          "amount": '100000.12',
+          "currency": 'BRL',
+        }],
     },
-  };
+  }
+};
 
   async createMapeamento(
     createMapeamentoDto: CreateMapeamentoDto,
   ): Promise<IMapeamento> {
-    let nomesDosCamposEmArrayObjects = ConvertObjectToString.converter(
+    let itensMapeados = this.realizaMapeamentoDeObjeto(
       this.template.dataExemplo
     );
 
-    let mapeamentoItens = nomesDosCamposEmArrayObjects.map(
-      (s: any, index: number) => {
-        let mapeamentoItem: MapeamentoItem = {
-          mapeamentoItemId: index + 1,
-          pathTemplate: s.slice(1),
-          pathPersona: '',
-        };
-
-        return mapeamentoItem;
-      },
-    );
 
     let mapeamento: CreateMapeamentoDto = {
       template: '[2.0.0] [post] [request] payment/consent/',
       templateId: '1',
-      mapeamentoItens: mapeamentoItens,
+      mapeamentoItemStringfy: JSON.stringify(itensMapeados),
     };
 
     const newMapeamento = await new this.mapeamentoModel(mapeamento);
@@ -74,21 +85,29 @@ export class MapeamentoService {
   }
 
   async getAllMapeamentos(): Promise<IMapeamento[]> {
-    const personaData = await this.mapeamentoModel.find();
-    if (!personaData || personaData.length == 0) {
+    const mapeamentoData = await this.mapeamentoModel.find();
+    if (!mapeamentoData || mapeamentoData.length == 0) {
       throw new NotFoundException('Mapeamentos data not found!');
     }
-    return personaData;
+
+    return mapeamentoData;
   }
 
-  async getMapeamento(mapeamentoId: string): Promise<IMapeamento> {
+  async getMapeamento(mapeamentoId: string): Promise<any> {
     const existingMapeamento = await this.mapeamentoModel
       .findById(mapeamentoId)
       .exec();
     if (!existingMapeamento) {
       throw new NotFoundException(`Mapeamento #${mapeamentoId} not found`);
     }
-    return existingMapeamento;
+
+    let data = {
+       template : existingMapeamento.template,
+       _id : existingMapeamento._id,
+       templateId : existingMapeamento.templateId,
+       mapeamentoItens: JSON.parse(existingMapeamento.mapeamentoItemStringfy)
+    }
+    return data;
   }
 
   async deleteMapeamento(mapeamentoId: string): Promise<IMapeamento> {
@@ -99,5 +118,44 @@ export class MapeamentoService {
       throw new NotFoundException(`Mapeamento #${mapeamentoId} not found`);
     }
     return deletedMapeamento;
+  }
+
+  public realizaMapeamentoDeObjeto(object : any){
+    let elementos = this.montaMapeamentoDeItemPorTemplate(object, null);
+    return elementos;
+}
+
+
+public montaMapeamentoDeItemPorTemplate(object: any, mapemantoItem: MapeamentoItem): MapeamentoItem[] {
+    let nomes = Object.keys(object);
+    let mapeamentos :  any []= [];
+    let mapemantoItemTemp = mapemantoItem ?? new MapeamentoItem();
+    nomes.forEach((x) => {
+      let mapeamento : MapeamentoItem =  Object.create(mapemantoItemTemp);
+
+      mapeamento.pathTemplate = mapemantoItemTemp.pathTemplate ? `${mapemantoItemTemp.pathTemplate}.${x}`  : x;
+      mapeamento.tipoMapeamentoItem = TipoMapeamentoItemEnum.object;
+      if (typeof object[x] == 'object') {
+        if(Array.isArray(object[x])){
+          mapeamento.tipoMapeamentoItem = TipoMapeamentoItemEnum.arrayString;
+
+          if(typeof object[x][0] == 'object'){
+            mapeamento.tipoMapeamentoItem = TipoMapeamentoItemEnum.arrayObject;
+
+            let mapeamentoArray = this.montaMapeamentoDeItemPorTemplate(object[x][0], mapeamento);
+            mapeamento.subMapeamentoItem = mapeamentoArray;
+          }
+
+          mapeamentos.push(mapeamento);
+
+        }else{
+          let novoMapeamento = this.montaMapeamentoDeItemPorTemplate(object[x], mapeamento);
+          mapeamentos.push(...novoMapeamento);
+        }
+      } else {
+        mapeamentos.push(mapeamento);
+      }
+    });
+    return mapeamentos;
   }
 }

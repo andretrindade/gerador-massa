@@ -9,8 +9,10 @@ export class Mapeamento {
    @Prop({type:Object})
    template : any;
 
-   @Prop()
-   mapeamentoItens : MapeamentoItem[]
+   @Prop({type:Object})
+   mapeamentoItemStringfy : string
+
+   mapeamentoItens : any[]
 
    
 }
