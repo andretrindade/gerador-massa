@@ -73,9 +73,12 @@ export class MapeamentoService {
     mapeamentoId: string,
     updateMapeamentoDto: UpdateMapeamentoDto,
   ): Promise<IMapeamento> {
+
+    let mapeamento = { mapeamentoItemStringfy : JSON.stringify(updateMapeamentoDto)};
+
     const existingMapeamento = await this.mapeamentoModel.findByIdAndUpdate(
       mapeamentoId,
-      updateMapeamentoDto,
+      mapeamento,
       { new: true },
     );
     if (!existingMapeamento) {
