@@ -4,14 +4,32 @@ import { Model } from 'mongoose';
 import { ITemplate } from 'src/interface/template.inteface';
 import { CreateTemplateDto } from 'src/dto/create-template.dto';
 import { UpdateTemplateDto } from 'src/dto/update-template.dto';
+import { MapeamentoService } from './mapeamento.service';
+import { CreateMapeamentoDto } from 'src/dto/create-mapeamento.dto';
 @Injectable()
 export class TemplateService {
 
-  constructor(@InjectModel('Template') private templateModel: Model<ITemplate>) { }
+  constructor(@InjectModel('Template') private templateModel: Model<ITemplate>,
+   private mapeamentoService : MapeamentoService) { }
 
-  createTemplate(createTemplateDto: CreateTemplateDto): Promise<ITemplate> {
+  async createTemplate(createTemplateDto: CreateTemplateDto): Promise<ITemplate> {
     const newTemplate = new this.templateModel(createTemplateDto);
-    return newTemplate.save();
+    const resultTempalte = await newTemplate.save();
+
+      let createMapeamentoDto: CreateMapeamentoDto = {
+          template: createTemplateDto,
+          templateId: newTemplate._id,
+          mapeamentoItemStringfy : ""
+      }
+    const createMapeamentoResult = await this.mapeamentoService.createMapeamento(createMapeamentoDto);
+
+    const updateTemplateDto: UpdateTemplateDto = {
+      mapeamentoId : createMapeamentoResult._id
+    }
+    
+    const updateTemplateResult = this.updateTemplate(resultTempalte._id,updateTemplateDto);
+
+    return updateTemplateResult;
   }
 
   async findAll(): Promise<ITemplate[]> {

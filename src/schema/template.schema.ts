@@ -12,6 +12,9 @@ export class Template {
     readonly method: string;
     @Prop()
     readonly location: string;
+    @Prop()
+    readonly mapeamentoId: string;
+    
     @Prop({ type: Object })
     readonly template: any;
 }
