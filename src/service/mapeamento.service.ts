@@ -13,55 +13,17 @@ export class MapeamentoService {
     @InjectModel('Mapeamento') private mapeamentoModel: Model<IMapeamento>,
   ) {}
 
-
-  template: any = {
-    id: 1,
-    descricao: '[2.0.0] [post] [response] [201] consent/consent/',
-    dataExemplo: {
-     
-      "data": {
-        "consentId": "urn:bb:BB96825411",
-        "creationDateTime": "2022-08-01T09:35:00Z",
-        "status": "AUTHORISED",
-        "statusUpdateDateTime": "2022-08-01T09:35:00Z",
-        "permissions": [
-            "ACCOUNTS_READ",
-            "ACCOUNTS_BALANCES_READ",
-            "ACCOUNTS_TRANSACTIONS_READ",
-            "ACCOUNTS_OVERDRAFT_LIMITS_READ",
-            "CREDIT_CARDS_ACCOUNTS_READ",
-            "CREDIT_CARDS_ACCOUNTS_BILLS_READ",
-            "CREDIT_CARDS_ACCOUNTS_LIMITS_READ",
-            "RESOURCES_READ"
-        ],
-        "expirationDateTime": "2023-08-01T10:35:00Z",
-        "links": {
-            "self": "https://opendata.api.bb.com.br/open-banking/consents/v1/consents/urn:bb:BB96925654"
-        },
-        "meta": {
-            "totalRecords": 1,
-            "totalPages": 1,
-            "requestDateTime": "2022-08-03T10:42:00Z"
-        },
-        "payment": [{
-          "amount": '100000.12',
-          "currency": 'BRL',
-        }],
-    },
-  }
-};
-
   async createMapeamento(
     createMapeamentoDto: CreateMapeamentoDto,
   ): Promise<IMapeamento> {
     let itensMapeados = this.realizaMapeamentoDeObjeto(
-      this.template.dataExemplo
+      createMapeamentoDto.template.template
     );
 
 
     let mapeamento: CreateMapeamentoDto = {
-      template: '[2.0.0] [post] [request] payment/consent/',
-      templateId: '1',
+      template: createMapeamentoDto.template,
+      templateId: createMapeamentoDto.templateId,
       mapeamentoItemStringfy: JSON.stringify(itensMapeados),
     };
 
@@ -74,7 +36,7 @@ export class MapeamentoService {
     updateMapeamentoDto: UpdateMapeamentoDto,
   ): Promise<IMapeamento> {
 
-    let mapeamento = { mapeamentoItemStringfy : JSON.stringify(updateMapeamentoDto)};
+    let mapeamento = { mapeamentoItemStringfy : JSON.stringify(updateMapeamentoDto.mapeamentoItens)};
 
     const existingMapeamento = await this.mapeamentoModel.findByIdAndUpdate(
       mapeamentoId,
@@ -131,7 +93,7 @@ export class MapeamentoService {
 
 public montaMapeamentoDeItemPorTemplate(object: any, mapemantoItem: MapeamentoItem): MapeamentoItem[] {
     let nomes = Object.keys(object);
-    let mapeamentos :  any []= [];
+    let mapeamentos :  MapeamentoItem []= [];
     let mapemantoItemTemp = mapemantoItem ?? new MapeamentoItem();
     nomes.forEach((x) => {
       let mapeamento : MapeamentoItem =  Object.create(mapemantoItemTemp);
@@ -146,6 +108,7 @@ public montaMapeamentoDeItemPorTemplate(object: any, mapemantoItem: MapeamentoIt
             mapeamento.tipoMapeamentoItem = TipoMapeamentoItemEnum.arrayObject;
 
             let mapeamentoArray = this.montaMapeamentoDeItemPorTemplate(object[x][0], mapeamento);
+            mapeamentoArray.forEach((x, index)=> { x.mapeamentoItemId = index+ 1});
             mapeamento.subMapeamentoItem = mapeamentoArray;
           }
 
@@ -159,6 +122,9 @@ public montaMapeamentoDeItemPorTemplate(object: any, mapemantoItem: MapeamentoIt
         mapeamentos.push(mapeamento);
       }
     });
+
+    mapeamentos.forEach((x, index)=> { x.mapeamentoItemId = index + 1});
+
     return mapeamentos;
   }
 }

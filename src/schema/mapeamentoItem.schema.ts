@@ -6,5 +6,5 @@ export default class MapeamentoItem {
    pathTemplate : string; 
    pathPersona: string;
    tipoMapeamentoItem : TipoMapeamentoItemEnum;
-   subMapeamentoItem : MapeamentoItem[]
+   subMapeamentoItem : MapeamentoItem[];
 }
